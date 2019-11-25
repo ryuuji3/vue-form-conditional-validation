@@ -3,7 +3,8 @@
     <template #default="{ invalid, handleSubmit }">
       <b-container>
         <b-form @submit.prevent="handleSubmit(submit)" class="form">
-          <date-input name="birthday" v-model="birthday" :description="ageDescription" placeholder="yyyy-mm-dd" />
+          <date-input name="birthday" v-model="birthday" label="Birthday" :description="ageDescription" />
+          <date-input name="g1_date" v-model="g1Date" label="G1 Date" :min-date="eligibleForG1Date" />
 
           <b-button type="submit" :disabled="invalid">Submit</b-button>
 
@@ -34,15 +35,27 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["age"]),
+    ...mapGetters(["age", "eligibleForG1Date"]),
+
+    // fields
     birthday: {
       get() {
-        return this.$store.state.application.birthday?.format("YYYY-MM-DD");
+        return this.$store.state.application.birthday;
       },
       set(birthday) {
         this.updateBirthday(birthday);
       }
     },
+    g1Date: {
+      get() {
+        return this.$store.state.application.G1Date;
+      },
+      set(date) {
+        this.updateG1Date(date);
+      }
+    },
+
+    // text
     ageDescription() {
       return this.age ? `Age: ${this.age} years` : null;
     },
@@ -51,7 +64,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(["updateBirthday"]),
+    ...mapMutations(["updateBirthday", "updateG1Date"]),
     submit() {
       this.submitted = true;
     }

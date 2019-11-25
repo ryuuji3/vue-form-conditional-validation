@@ -1,8 +1,20 @@
 <template>
   <validation-provider :rules="rules">
-    <template #default>
-      <b-form-group :label="label" :description="description" v-bind="$attrs">
-        <b-form-input :id="id" :name="name" v-model="date" type="date" :placeholder="placeholder" />
+    <template #default="{ errors, valid }">
+      <b-form-group
+        :label="label"
+        :description="description"
+        v-bind="$attrs"
+        :invalid-feedback="errors[0]"
+        :state="valid"
+      >
+        <b-form-input
+          :id="id"
+          :name="name"
+          v-model="date"
+          type="date"
+          :placeholder="placeholder"
+        />
       </b-form-group>
     </template>
   </validation-provider>
@@ -36,6 +48,10 @@ export default {
       type: String,
       required: true
     },
+    placeholder: {
+      type: String,
+      default: "YYYY-MM-DD"
+    },
     label: {
       type: String,
       default: "Date"
@@ -48,21 +64,32 @@ export default {
       type: [String, Date],
       default: null
     },
+    // validation
     required: {
       type: Boolean,
       default: false
     },
-    placeholder: {
-      type: String,
-      default: "YYYY-MM-DD"
+    minDate: {
+      type: [Date, Boolean],
+      default: false
+    },
+    maxDate: {
+      type: [Date, Boolean],
+      default: false
     }
   },
   computed: {
     date: {
       get() {
-        return this.value && this.value.isValid
-          ? this.value.format("YYYY-MM-DD")
-          : this.rawValue;
+        if (this.value) {
+          const parsed = Moment(this.value);
+
+          if (parsed.isValid) {
+            return parsed.format("YYYY-MM-DD");
+          }
+        }
+
+        return this.rawValue;
       },
       set(text) {
         const parsed = Moment(text, "YYYY-MM-DD");
@@ -70,12 +97,16 @@ export default {
         this.rawValue = text;
 
         if (parsed && parsed.isValid) {
-          this.$emit("input:date", parsed);
+          this.$emit("input:date", parsed.toDate());
         }
       }
     },
     rules() {
-      return `required`;
+      return {
+        required: this.required,
+        min_date: this.minDate,
+        max_date: this.maxDate
+      };
     }
   }
 };
