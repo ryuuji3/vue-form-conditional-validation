@@ -3,8 +3,32 @@
     <template #default="{ invalid, handleSubmit }">
       <b-container>
         <b-form @submit.prevent="handleSubmit(submit)" class="form">
-          <date-input name="birthday" v-model="birthday" label="Birthday" :description="ageDescription" />
-          <date-input name="g1_date" v-model="g1Date" label="G1 Date" :min-date="eligibleForG1Date" />
+          <date-input
+            name="birthday"
+            v-model="birthday"
+            label="Birthday"
+            :description="ageDescription"
+            required
+          />
+          <date-input
+            name="g1_date"
+            v-model="g1Date"
+            label="G1 Date"
+            :min-date="eligibleForG1Date"
+            required
+          />
+
+          <b-form-group label="Driver school for G1?">
+            <b-form-checkbox v-model="g1School" />
+          </b-form-group>
+
+          <date-input
+            name="g2_date"
+            v-model="g2Date"
+            label="G2 Date"
+            :min-date="eligibleForG2Date"
+            required
+          />
 
           <b-button type="submit" :disabled="invalid">Submit</b-button>
 
@@ -35,7 +59,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["age", "eligibleForG1Date"]),
+    ...mapGetters(["age", "eligibleForG1Date", "eligibleForG2Date"]),
 
     // fields
     birthday: {
@@ -54,6 +78,22 @@ export default {
         this.updateG1Date(date);
       }
     },
+    g1School: {
+      get() {
+        return this.$store.state.application.driverSchoolG1;
+      },
+      set(value) {
+        this.setDriverSchoolG1(value);
+      }
+    },
+    g2Date: {
+      get() {
+        return this.$store.state.application.G2Date;
+      },
+      set(date) {
+        this.updateG2Date(date);
+      }
+    },
 
     // text
     ageDescription() {
@@ -64,7 +104,12 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(["updateBirthday", "updateG1Date"]),
+    ...mapMutations([
+      "updateBirthday",
+      "updateG1Date",
+      "setDriverSchoolG1",
+      "updateG2Date"
+    ]),
     submit() {
       this.submitted = true;
     }
